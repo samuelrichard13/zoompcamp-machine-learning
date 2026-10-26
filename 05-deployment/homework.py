@@ -1,5 +1,6 @@
 import pickle
 from pathlib import Path
+<<<<<<< HEAD
 from model import normalize_record
 
 MODEL_PATH = Path(__file__).with_name("pipeline.bin")
@@ -26,3 +27,12 @@ assert 0 < first < 1
 assert first == second
 print({"conversion_probability": round(first, 3), "conversion": first >= 0.5})
 
+=======
+
+model_file = "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/33ad5e9ad4d56fcfdd8ff162eca75b7628c8d1ed/cohorts/2026/homework/05-deployment/pipeline.bin"
+
+
+MODEL_PATH = Path("https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2026/homework/05-deployment/pipeline.bin")
+with MODEL_PATH.open("rb") as model_file:
+    pipeline = pickle.load(model_file)
+>>>>>>> 2863316 (test)
