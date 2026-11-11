@@ -8,6 +8,8 @@ This project aims to predict sleep scores based on data such as duration, bedtim
 
 ## Data preparation and EDA
 
+We use the " Digital Insomnia: Screen Habits & Sleep " dataset available on [Kaggle](https://www.kaggle.com/datasets/beamhonor0911/digital-insomnia-screen-habits-sleep).
+
 Here is a preview of the dataset :
 
 <table border="1" class="dataframe">
@@ -161,7 +163,7 @@ Here is a preview of the dataset :
   </tbody>
 </table>
 
-We convert the only boolean feature as integer with :
+We convert the only boolean feature **blue_light_filter_on** as integer with :
 
 ```python
 df["blue_light_filter_on"] = df["blue_light_filter_on"].astype(int)
@@ -415,4 +417,69 @@ We can also notice that the type of app used before to sleep is of major importa
 At the bottom of the list, we can see the features that have low impact on fatigue such as age, ambient noise or bedtime hour.
 
  ## Deployment
+
+The notebook **Project.ipynb** which the model has been train is now turned into a python script **train_sleep_score.py**.
+Only the final model training is kept in this script and the model is saved in **model_sleep_score.bin**.
+
+Then, the model is turn into a web service in **predict_sleep_score.py** using FastAPI and we isolate it in a virtual environment using **uv**.
+This last step generates the following files **.python-version**, **pyproject.toml** and **uv.lock** as well as the **.venv** directory.
+
+Finally, we pack the application together with its whole environment thanks to **Docker**.
+
+To deploy the model as a web service, we need to build the image from the DockerFile :
+
+```
+docker build -t sleep_prediction .
+```
+
+and run it :
+
+```
+docker run -it --rm -p 9696:9696 sleep_prediction
+```
+
+We can now test this web service by sending a request in another terminal :
+
+```
+curl -X 'POST' 'http://localhost:9696/predict' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '    {"user_id": 2718,
+ "age": 36,
+ "gender": "Non-Binary",
+ "chronotype": "Intermediate",
+ "occupation": "Professional",
+ "bedtime_hour": 0.09,
+ "screen_time_before_bed_min": 66,
+ "primary_app_category": "Streaming",
+ "screen_brightness_pct": 67,
+ "blue_light_filter_on": 0,
+ "caffeine_intake_mg": 41,
+ "caffeine_last_hour": 19.2,
+ "physical_activity_min": 1,
+ "room_temperature_f": 75.7,
+ "ambient_noise_db": 36.5,
+ "sleep_onset_latency_min": 31.4,
+ "total_sleep_hours": 6.14,
+ "rem_sleep_pct": 17.4,
+ "deep_sleep_pct": 16.5,
+ "awakenings_count": 4,
+ "sleep_efficiency_pct": 77.8}'
+```
+
+For the sake of convinience, this request has been written in the text file **script** that can be executed in a terminal :
+
+```
+./script
+{"sleep score prediction":5.35018052765012}
+```
+
+The request send back the next day fatigue score (which is for this particular exemple 5.350).
+
+Another way to submit a request to the web service is throught the python script **request.py**.
+
+```
+python request.py
+{'sleep score prediction': 5.35018052765012}
+```
 
