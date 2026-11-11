@@ -245,12 +245,12 @@ A similar analysis on categorical variables shows that the most significant one 
 
 After splitting the dataset into **training**, **validation** and **test** with **train_test_split**, and transforming the numerical features with **StandardScaler** and the categorical feature with **OneHotEncoder**, we are now ready to train several model.
 
-The first one we want to try is the linear regression which is the most simple model for a regression problem.
+The first one we want to try is the linear regression which is the simplest model for a regression problem.
 
 The root mean squared error for this model is 0.418.
-Then, we try Ridge and Lasso regression, and tune their * * alpha * * parameter. The best tunnings for these two models give exactly the same result as the linear regression but the avoid the high coefficients of the model.
+Then, we try Ridge and Lasso regression, and tune their * * alpha * * parameter. The best tunings for these two models give exactly the same result as the linear regression but the avoid the high coefficients of the model.
 
-Then we try **DecisionTreeRegressor** and **RandomForestRegressor**, but even when tunning their parameter the best root mean squared errors are respectively 0.537 and 0.463 so these two models are worse than the previous ones.
+Then we try **DecisionTreeRegressor** and **RandomForestRegressor**, but even when tuning their parameter the best root mean squared errors are respectively 0.537 and 0.463 so these two models are worse than the previous ones.
 Same thing for **XGBoost** which give a room mean squared error of 0.470.
 
 Finally we try a **KernelRidge** model that give a 0.413 root mean squared error with the following tuned parameters :
@@ -261,7 +261,7 @@ alpha = 0.1
 kernel = 'poly'
 ```
 
-This model is interresting because it gives a slightly better result but at the cost of greater complexity. Indeed, since this model is non-linear, it is much more difficult to interpret.
+This model is interesting because it gives a slightly better result but at the cost of greater complexity. Indeed, since this model is non-linear, it is much more difficult to interpret.
 Contrary to linear models, we can not rank the features impact on the target variable by looking at the model's coefficients.
 Since the performance increase is not very important, we chose to keep a simple linear model.
 
@@ -411,7 +411,7 @@ pd.DataFrame({'features':features, 'coef':las.coef_, 'abs(coef)':abs(las.coef_)}
   </tbody>
 </table>
 
-As can be expected, the total sleep hours is the most important feature and the negetive sign indicates that the most we sleep, the less is the fatigue the next day.
+As can be expected, the total sleep hours is the most important feature and the negative sign indicates that the most we sleep, the less is the fatigue the next day.
 Among the most important features, we can cite the awakenings count, sleep efficiency percentage	 or the screen time before bed.
 We can also notice that the type of app used before to sleep is of major importance : E-reading decreeases by 0.32 point the fatigue score while short form video increases it by 0.19.
 At the bottom of the list, we can see the features that have low impact on fatigue such as age, ambient noise or bedtime hour.
@@ -467,7 +467,7 @@ curl -X 'POST' 'http://localhost:9696/predict' \
  "sleep_efficiency_pct": 77.8}'
 ```
 
-For the sake of convinience, this request has been written in the text file **script** that can be executed in a terminal :
+For convinience, this request has been written in the text file **script** that can be executed in a terminal :
 
 ```
 ./script
