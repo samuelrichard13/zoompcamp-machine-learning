@@ -237,7 +237,7 @@ room_temperature_f            0.011141
 dtype: float64
 ```
 
-A similar analysis on categorical variables shows that the only one that has significant effect on sleep score is **chronotype**, then we eliminate the others.
+A similar analysis on categorical variables shows that the most significant one on sleep score is **primary_app_category**, then we eliminate the others.
 
 ## Model training
 
@@ -409,7 +409,10 @@ pd.DataFrame({'features':features, 'coef':las.coef_, 'abs(coef)':abs(las.coef_)}
   </tbody>
 </table>
 
-
+As can be expected, the total sleep hours is the most important feature and the negetive sign indicates that the most we sleep, the less is the fatigue the next day.
+Among the most important features, we can cite the awakenings count, sleep efficiency percentage	 or the screen time before bed.
+We can also notice that the type of app used before to sleep is of major importance : E-reading decreeases by 0.32 point the fatigue score while short form video increases it by 0.19.
+At the bottom of the list, we can see the features that have low impact on fatigue such as age, ambient noise or bedtime hour.
 
  ## Deployment
 
