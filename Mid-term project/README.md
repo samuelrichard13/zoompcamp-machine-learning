@@ -206,7 +206,210 @@ sleep_debt_category           0
 dtype: int64
 ```
 
-Finally, we look at the distribution of the target variable and notice that it is close to a normal distribution. 
+Finally, we look at the distribution of the target variable **next_day_fatigue_score** and notice that it is close to normal distribution. 
 
 
 <Figure size 640x480 with 1 Axes><img width="572" height="433" alt="image" src="https://github.com/user-attachments/assets/2f85662f-51bc-481e-ba9d-c7aa0966391d" />
+
+The computation of pairwise correlation between the target variable and each numerical features allow to eliminate the less instructive features such as **room_temperature_f**, **user_id** and **physical_activity_min**.
+
+```python
+df[numerical_variable].corrwith(df.next_day_fatigue_score).abs().sort_values(ascending=False)
+```
+```
+total_sleep_hours             0.688568
+sleep_efficiency_pct          0.536935
+sleep_onset_latency_min       0.479315
+awakenings_count              0.440525
+rem_sleep_pct                 0.337327
+screen_time_before_bed_min    0.336067
+age                           0.278334
+caffeine_intake_mg            0.261541
+deep_sleep_pct                0.190759
+screen_brightness_pct         0.176128
+blue_light_filter_on          0.132120
+bedtime_hour                  0.132016
+caffeine_last_hour            0.131273
+ambient_noise_db              0.067587
+physical_activity_min         0.016990
+user_id                       0.013405
+room_temperature_f            0.011141
+dtype: float64
+```
+
+A similar analysis on categorical variables shows that the only one that has significant effect on sleep score is **chronotype**, then we eliminate the others.
+
+## Model training
+
+After splitting the dataset into **training**, **validation** and **test** with **train_test_split**, and transforming the numerical features with **StandardScaler** and the categorical feature with **OneHotEncoder**, we are now ready to train several model.
+
+The first one we want to try is the linear regression which is the most simple model for a regression problem.
+
+The root mean squared error for this model is 0.418.
+Then, we try Ridge and Lasso regression, and tune their * * alpha * * parameter. The best tunnings for these two models give exactly the same result as the linear regression but the avoid the high coefficients of the model.
+
+Then we try **DecisionTreeRegressor** and **RandomForestRegressor**, but even when tunning their parameter the best root mean squared errors are respectively 0.537 and 0.463 so these two models are worse than the previous ones.
+Same thing for **XGBoost** which give a room mean squared error of 0.470.
+
+Finally we try a **KernelRidge** model that give a 0.413 root mean squared error with the following tuned parameters :
+```python
+degree =3
+gamma = 0.003
+alpha = 0.1
+kernel = 'poly'
+```
+
+This model is interresting because it gives a slightly better result but at the cost of greater complexity. Indeed, since this model is non-linear, it is much more difficult to interpret.
+Contrary to linear models, we can not rank the features impact on the target variable by looking at the model's coefficients.
+Since the performance increase is not very important, we chose to keep a simple linear model.
+
+Finally, we train the final model with the full training dataset (training + validation) : a Lasso regressor with alpha=0.0005.
+On this new trainig dataset the root mean squared error is even better : 0.406, and the coefficients of the model, sorted by absolute values are :
+
+```python
+pd.DataFrame({'features':features, 'coef':las.coef_, 'abs(coef)':abs(las.coef_)}).sort_values(by='abs(coef)',ascending=False)
+```
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>features</th>
+      <th>coef</th>
+      <th>abs(coef)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>total_sleep_hours</td>
+      <td>-0.600169</td>
+      <td>0.600169</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>primary_app_category_E-Reading</td>
+      <td>-0.315365</td>
+      <td>0.315365</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>awakenings_count</td>
+      <td>0.244868</td>
+      <td>0.244868</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>primary_app_category_Short-Form Video</td>
+      <td>0.186620</td>
+      <td>0.186620</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>sleep_efficiency_pct</td>
+      <td>-0.152630</td>
+      <td>0.152630</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>screen_time_before_bed_min</td>
+      <td>0.133989</td>
+      <td>0.133989</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>primary_app_category_Gaming</td>
+      <td>0.125909</td>
+      <td>0.125909</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>rem_sleep_pct</td>
+      <td>-0.111924</td>
+      <td>0.111924</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>primary_app_category_Social Media</td>
+      <td>0.104756</td>
+      <td>0.104756</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>primary_app_category_News</td>
+      <td>-0.075915</td>
+      <td>0.075915</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>screen_brightness_pct</td>
+      <td>0.072634</td>
+      <td>0.072634</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>blue_light_filter_on</td>
+      <td>-0.070845</td>
+      <td>0.070845</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>caffeine_intake_mg</td>
+      <td>0.053260</td>
+      <td>0.053260</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>sleep_onset_latency_min</td>
+      <td>0.044667</td>
+      <td>0.044667</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>primary_app_category_Streaming</td>
+      <td>-0.038833</td>
+      <td>0.038833</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>caffeine_last_hour</td>
+      <td>0.032420</td>
+      <td>0.032420</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>bedtime_hour</td>
+      <td>0.015942</td>
+      <td>0.015942</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>ambient_noise_db</td>
+      <td>-0.009966</td>
+      <td>0.009966</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>deep_sleep_pct</td>
+      <td>-0.005654</td>
+      <td>0.005654</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>age</td>
+      <td>0.003716</td>
+      <td>0.003716</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>primary_app_category_Messaging</td>
+      <td>-0.000000</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+ ## Deployment
+
